@@ -5,6 +5,8 @@ import torch
 import os
 from omegaconf import OmegaConf
 from tqdm import tqdm
+from datetime import datetime
+
 from torchvision import transforms
 from torchvision.io import write_video
 from einops import rearrange
@@ -169,8 +171,15 @@ def encode(self, videos: torch.Tensor) -> torch.Tensor:
     output = torch.stack(output, dim=0)
     return output
 
+# MMDD_HHMM
+current_datetime = datetime.now().strftime("%m%d_%H%M")
+config.output_folder = os.path.join(config.output_folder, f'{current_datetime}')
+os.makedirs(config.output_folder, exist_ok=True)
 
 for i, batch_data in tqdm(enumerate(dataloader), disable=(local_rank != 0)):
+    if i > 3:
+        break
+
     idx = batch_data['idx'].item()
 
     # For DataLoader batch_size=1, the batch_data is already a single item, but in a batch container
@@ -209,7 +218,7 @@ for i, batch_data in tqdm(enumerate(dataloader), disable=(local_rank != 0)):
         text_prompts=prompts,
         return_latents=True,
         low_memory=low_memory,
-        profile=False,
+        profile=True,
     )
     current_video = rearrange(video, 'b t c h w -> b t h w c').cpu()
     all_video.append(current_video)
@@ -239,9 +248,9 @@ for i, batch_data in tqdm(enumerate(dataloader), disable=(local_rank != 0)):
         for seed_idx in range(config.num_samples):
             # All processes save their videos
             if config.save_with_index:
-                output_path = os.path.join(config.output_folder, f'rank{rank}-{idx}-{seed_idx}_{model_type}.mp4')
+                output_path = os.path.join(config.output_folder, f'{idx}-{seed_idx}_{model_type}.mp4')
             else:
-                output_path = os.path.join(config.output_folder, f'rank{rank}-{prompt[:100]}-{seed_idx}.mp4')
+                output_path = os.path.join(config.output_folder, f'{prompt[:100]}-{seed_idx}.mp4')
             write_video(output_path, video[seed_idx], fps=16)
 
     if config.inference_iter != -1 and i >= config.inference_iter:
