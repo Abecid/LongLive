@@ -177,7 +177,9 @@ def attention(
                 query=q, key=kk, value=v, mask_map=None, sparsity_type="radial", block_size=128, decay_factor=decay_factor, model_type="wan", pre_defined_mask=None, use_sage_attention=True
             )
     elif attention_type == 'sa':
-        torch.nn.functional.scaled_dot_product_attention = sageattn
+        sdpa = sageattn
+    else:
+        sdpa = torch.nn.functional.scaled_dot_product_attention
     
     if q_lens is not None or k_lens is not None:
         warnings.warn(
@@ -189,7 +191,7 @@ def attention(
     k = k.transpose(1, 2).to(dtype)
     v = v.transpose(1, 2).to(dtype)
 
-    out = torch.nn.functional.scaled_dot_product_attention(
+    out = sdpa(
         q, k, v, attn_mask=attn_mask, is_causal=causal, dropout_p=dropout_p)
 
     out = out.transpose(1, 2).contiguous()

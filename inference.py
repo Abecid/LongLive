@@ -24,6 +24,7 @@ from utils.memory import gpu, get_cuda_free_memory_gb, DynamicSwapInstaller, log
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config_path", type=str, help="Path to the config file")
+parser.add_argument("--run_name", type=str, help="Run name to distinguish experimenting feature")
 args = parser.parse_args()
 
 config = OmegaConf.load(args.config_path)
@@ -173,7 +174,8 @@ def encode(self, videos: torch.Tensor) -> torch.Tensor:
 
 # MMDD_HHMM
 current_datetime = datetime.now().strftime("%m%d_%H%M")
-config.output_folder = os.path.join(config.output_folder, f'{current_datetime}')
+run_name = "" if args.run_name is None else f"_{args.run_name}"
+config.output_folder = os.path.join(config.output_folder, f'{current_datetime}{run_name}')
 os.makedirs(config.output_folder, exist_ok=True)
 
 for i, batch_data in tqdm(enumerate(dataloader), disable=(local_rank != 0)):
