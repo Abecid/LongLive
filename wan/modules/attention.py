@@ -174,7 +174,7 @@ def attention(
     elif attention_type == 'ra':
         decay_factor = 1.0
         return RadialAttention(
-                query=q, key=kk, value=v, mask_map=None, sparsity_type="radial", block_size=128, decay_factor=decay_factor, model_type="wan", pre_defined_mask=None, use_sage_attention=True
+                query=q, key=k, value=v, mask_map=None, sparsity_type="radial", block_size=128, decay_factor=decay_factor, model_type="wan", pre_defined_mask=None, use_sage_attention=True
             )
     elif attention_type == 'sa':
         sdpa = sageattn
