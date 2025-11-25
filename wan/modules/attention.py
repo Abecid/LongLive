@@ -21,8 +21,8 @@ except ModuleNotFoundError:
 
 print(f"Flash Attention 2 available: {FLASH_ATTN_2_AVAILABLE}\nFlash Attention 3 available: {FLASH_ATTN_3_AVAILABLE}")
 
-from radial_attention.radial_attn.attn_mask import RadialAttention, MaskMap
-from radial_attention.third_party.SageAttention.sageattention import sageattn
+# from radial_attention.radial_attn.attn_mask import RadialAttention, MaskMap
+# from radial_attention.third_party.SageAttention.sageattention import sageattn
 
 import warnings
 
@@ -173,12 +173,13 @@ def attention(
         )
     elif attention_type == 'ra':
         decay_factor = 1.0
-        mask_map = MaskMap(video_token_num=q.shape[1], num_frame=None)
-        return RadialAttention(
-                query=q, key=k, value=v, mask_map=mask_map, sparsity_type="radial", block_size=128, decay_factor=decay_factor, model_type="wan", pre_defined_mask=None, use_sage_attention=True
-            )
+        # mask_map = MaskMap(video_token_num=q.shape[1], num_frame=None)
+        # return RadialAttention(
+        #         query=q, key=k, value=v, mask_map=mask_map, sparsity_type="radial", block_size=128, decay_factor=decay_factor, model_type="wan", pre_defined_mask=None, use_sage_attention=False
+            # )
     elif attention_type == 'sa':
-        sdpa = sageattn
+        # sdpa = sageattn
+        pass
     else:
         sdpa = torch.nn.functional.scaled_dot_product_attention
     

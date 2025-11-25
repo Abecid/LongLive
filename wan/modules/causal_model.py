@@ -335,7 +335,7 @@ class CausalWanSelfAttention(nn.Module):
                     roped_query,
                     k_cat,
                     v_cat,
-                    attention_type='ra',
+                    attention_type='fa',
                 )
             else:
                 window_start = max(0, local_end_index - self.max_attention_size)
@@ -343,7 +343,7 @@ class CausalWanSelfAttention(nn.Module):
                     roped_query,
                     temp_k[:, window_start:local_end_index],
                     temp_v[:, window_start:local_end_index],
-                    attention_type='ra',
+                    attention_type='fa',
                 )
 
         # output

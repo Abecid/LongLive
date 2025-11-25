@@ -13,6 +13,7 @@ from einops import rearrange
 import torch.distributed as dist
 from torch.utils.data import DataLoader, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
+from torchao.quantization import quantize_, Float8WeightOnlyConfig
 
 from pipeline import (
     CausalInferencePipeline,
@@ -25,6 +26,7 @@ from utils.memory import gpu, get_cuda_free_memory_gb, DynamicSwapInstaller, log
 parser = argparse.ArgumentParser()
 parser.add_argument("--config_path", type=str, help="Path to the config file")
 parser.add_argument("--run_name", type=str, help="Run name to distinguish experimenting feature")
+parser.add_argument("--profile", action="store_true")
 args = parser.parse_args()
 
 config = OmegaConf.load(args.config_path)
@@ -141,6 +143,8 @@ if low_memory:
 pipeline.generator.to(device=device)
 pipeline.vae.to(device=device)
 
+# quantize_(pipeline.generator, Float8WeightOnlyConfig())
+
 extended_prompt_path = config.data_path
 dataset = TextDataset(prompt_path=config.data_path, extended_prompt_path=extended_prompt_path)
 num_prompts = len(dataset)
@@ -220,7 +224,7 @@ for i, batch_data in tqdm(enumerate(dataloader), disable=(local_rank != 0)):
         text_prompts=prompts,
         return_latents=True,
         low_memory=low_memory,
-        profile=True,
+        profile=args.profile,
     )
     current_video = rearrange(video, 'b t c h w -> b t h w c').cpu()
     all_video.append(current_video)
