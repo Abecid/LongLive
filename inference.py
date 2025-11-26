@@ -13,7 +13,7 @@ from einops import rearrange
 import torch.distributed as dist
 from torch.utils.data import DataLoader, SequentialSampler
 from torch.utils.data.distributed import DistributedSampler
-from torchao.quantization import quantize_, Float8WeightOnlyConfig
+from torchao.quantization import quantize_, Float8WeightOnlyConfig, autoquant, PerRow, Float8DynamicActivationFloat8WeightConfig
 
 from pipeline import (
     CausalInferencePipeline,
@@ -143,7 +143,9 @@ if low_memory:
 pipeline.generator.to(device=device)
 pipeline.vae.to(device=device)
 
-# quantize_(pipeline.generator, Float8WeightOnlyConfig())
+quantize_(pipeline.generator, Float8WeightOnlyConfig())
+# quantize_(pipeline.generator, Float8DynamicActivationFloat8WeightConfig(granularity=PerRow()))
+# autoquant(pipeline.generator)
 
 extended_prompt_path = config.data_path
 dataset = TextDataset(prompt_path=config.data_path, extended_prompt_path=extended_prompt_path)
